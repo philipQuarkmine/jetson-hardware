@@ -12,6 +12,11 @@ import fcntl
 from Libs.MicLib import MicLib
 
 class MicManager:
+	def get_sound_level(self, duration=1, threshold=500):
+		"""
+		Streams audio for `duration` seconds and returns average amplitude.
+		"""
+		return self._mic.stream_amplitude(duration=duration, threshold=threshold)
 	_lock = threading.Lock()
 	_file_lock_path = '/tmp/mic_manager.lock'
 	_file_lock = None
