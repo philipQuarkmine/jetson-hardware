@@ -1,0 +1,103 @@
+{
+  "connection": {
+    "port": "/dev/ttyUSB0",
+    "baudrate": 115200,
+    "timeout": 1.0
+  },
+  "motors": {
+    "left_motor": {
+      "motor_id": 0,
+      "pwm_pin": 5,
+      "direction_pin": 7,
+      "max_speed": 100,
+      "acceleration_limit": 50,
+      "description": "Left drive motor - PWM ESC control"
+    },
+    "right_motor": {
+      "motor_id": 1,
+      "pwm_pin": 6,
+      "direction_pin": 8,
+      "max_speed": 100,
+      "acceleration_limit": 50,
+      "description": "Right drive motor - PWM ESC control"
+    }
+  },
+  "differential_drive": {
+    "enabled": true,
+    "wheelbase": 1.0,
+    "description": "Differential drive kinematics for robot navigation"
+  },
+  "pin_assignments": {
+    "description": "Arduino Nano pin assignments for hardware documentation",
+    "digital_pins": {
+      "0": "Serial RX (USB communication)",
+      "1": "Serial TX (USB communication)", 
+      "2": "Available",
+      "3": "Available (PWM capable)",
+      "4": "Available",
+      "5": "Left Motor PWM/ESC",
+      "6": "Right Motor PWM/ESC",
+      "7": "Left Motor Direction (optional)",
+      "8": "Right Motor Direction (optional)",
+      "9": "Reserved for Servo 1 (PWM)",
+      "10": "Reserved for Servo 2 (PWM)",
+      "11": "Reserved for additional PWM device",
+      "12": "Available",
+      "13": "Built-in LED / Status indicator"
+    },
+    "analog_pins": {
+      "A0": "Reserved for sensor input",
+      "A1": "Reserved for sensor input", 
+      "A2": "Reserved for current sensing",
+      "A3": "Reserved for current sensing",
+      "A4": "Reserved for I2C SDA (future)",
+      "A5": "Reserved for I2C SCL (future)",
+      "A6": "Available (analog only)",
+      "A7": "Available (analog only)"
+    }
+  },
+  "safety": {
+    "emergency_stop_enabled": true,
+    "watchdog_timeout_ms": 1000,
+    "max_acceleration": 50,
+    "speed_ramping_enabled": true
+  },
+  "future_expansion": {
+    "servo_devices": {
+      "enabled": false,
+      "camera_pan": {
+        "servo_id": 0,
+        "pin": 9,
+        "min_angle": 0,
+        "max_angle": 180
+      },
+      "camera_tilt": {
+        "servo_id": 1,
+        "pin": 10,
+        "min_angle": 0,
+        "max_angle": 180
+      }
+    },
+    "led_devices": {
+      "enabled": false,
+      "status_strip": {
+        "pin": 11,
+        "type": "WS2812",
+        "count": 8
+      }
+    },
+    "sensor_devices": {
+      "enabled": false,
+      "encoders": {
+        "left_encoder": {
+          "pin_a": "A0",
+          "pin_b": "A1"
+        },
+        "right_encoder": {
+          "pin_a": "A2", 
+          "pin_b": "A3"
+        }
+      }
+    }
+  }
+}

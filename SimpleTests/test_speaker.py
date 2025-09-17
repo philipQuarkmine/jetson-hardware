@@ -4,7 +4,7 @@ import os
 from Managers.Speaker_Manager import SpeakerManager
 
 def get_latest_recording():
-	rec_dir = os.path.join(os.path.dirname(__file__), "recordings")
+	rec_dir = "/home/phiip/jetson-hardware/recordings"
 	files = [f for f in os.listdir(rec_dir) if f.lower().endswith('.wav')]
 	if not files:
 		return None
