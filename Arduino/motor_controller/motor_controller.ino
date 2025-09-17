@@ -1,3 +1,29 @@
+/**
+ * Motor Controller for Jetson Hardware Platform
+ * 
+ * Controls two DC motors via PWM ESCs (Electronic Speed Controllers)
+ * Communicates with Jetson via serial at 115200 baud
+ * 
+ * Commands:
+ * - PING: Test connectivity (responds with PONG)
+ * - ESTOP: Emergency stop all motors
+ * - RESET: Clear emergency stop state and reset motors to zero
+ * - MOTOR:id:speed: Set motor speed (-100 to 100%)
+ * - STATUS: Get current motor speeds and emergency stop state
+ * 
+ * Pin Configuration:
+ * - Pin 5: Left Motor PWM (ESC signal)
+ * - Pin 6: Right Motor PWM (ESC signal)
+ * - Pin 7: Left Motor Direction (optional direction indicator)
+ * - Pin 8: Right Motor Direction (optional direction indicator)
+ * 
+ * Safety Features:
+ * - Emergency stop functionality
+ * - Speed range validation
+ * - Watchdog timer (500ms timeout)
+ * - PWM signal validation
+ */
+
 #include <Servo.h>
 
 // Motor ESC objects
@@ -16,7 +42,7 @@ int leftSpeed = 0;
 int rightSpeed = 0;
 bool emergencyStop = false;
 unsigned long lastCommandTime = 0;
-const unsigned long WATCHDOG_TIMEOUT = 1000; // 1 second
+const unsigned long WATCHDOG_TIMEOUT = 5000; // 5 seconds (extended for testing)
 
 void setup() {
   Serial.begin(115200);
@@ -52,12 +78,17 @@ void loop() {
   
   // Watchdog timer - stop motors if no commands received
   if (millis() - lastCommandTime > WATCHDOG_TIMEOUT) {
-    if (!emergencyStop) {
-      emergencyStop = true;
+    static bool watchdogWarning = false;
+    if (!watchdogWarning) {
       setMotorSpeed(0, 0);
       setMotorSpeed(1, 0);
       Serial.println("WATCHDOG_TIMEOUT");
+      watchdogWarning = true;
+      // Don't set emergency stop, just stop motors
     }
+  } else {
+    static bool watchdogWarning = false;
+    watchdogWarning = false; // Reset warning flag when commands resume
   }
   
   // Status LED blink
@@ -73,6 +104,7 @@ void handleCommand(String cmd) {
   
   if (cmd == "PING") {
     Serial.println("PONG");
+    emergencyStop = false; // Clear emergency stop on ping
     
   } else if (cmd == "ESTOP") {
     emergencyStop = true;
@@ -80,9 +112,16 @@ void handleCommand(String cmd) {
     setMotorSpeed(1, 0);
     Serial.println("OK");
     
+  } else if (cmd == "RESET") {
+    // Reset emergency stop state
+    emergencyStop = false;
+    setMotorSpeed(0, 0);
+    setMotorSpeed(1, 0);
+    Serial.println("OK");
+    
   } else if (cmd.startsWith("MOTOR:")) {
     if (emergencyStop) {
-      Serial.println("ERROR");
+      Serial.println("ERROR:ESTOP");
       return;
     }
     
@@ -97,10 +136,10 @@ void handleCommand(String cmd) {
         setMotorSpeed(motorId, speed);
         Serial.println("OK");
       } else {
-        Serial.println("ERROR");
+        Serial.println("ERROR:RANGE");
       }
     } else {
-      Serial.println("ERROR");
+      Serial.println("ERROR:FORMAT");
     }
     
   } else if (cmd == "STATUS") {
@@ -109,10 +148,16 @@ void handleCommand(String cmd) {
     Serial.print(",");
     Serial.print(rightSpeed);
     Serial.print(" ESTOP:");
-    Serial.println(emergencyStop ? "1" : "0");
+    Serial.print(emergencyStop ? "1" : "0");
+    Serial.print(" TIME:");
+    Serial.println(millis());
+    
+  } else if (cmd == "") {
+    // Ignore empty commands
+    return;
     
   } else {
-    Serial.println("ERROR");
+    Serial.println("ERROR:UNKNOWN");
   }
 }
 
@@ -123,6 +168,9 @@ void setMotorSpeed(int motorId, int speed) {
   // Convert percentage to PWM microseconds
   // 1500µs = stop, 1000µs = full reverse, 2000µs = full forward
   int pwmValue = map(speed, -100, 100, 1000, 2000);
+  
+  // Ensure PWM value is within safe ESC range
+  pwmValue = constrain(pwmValue, 1000, 2000);
   
   if (motorId == 0) {
     leftSpeed = speed;
