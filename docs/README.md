@@ -14,6 +14,11 @@ This folder contains documentation and hardware references for Jetson Orin Nano 
 - `6.I2C Communication Protocol.pdf`: I2C protocol details (from CubeNano)
 - `MicSpeakers_README.md`: Microphone and speaker manager usage, API, and troubleshooting (from MicSpeakers)
 
+### NEW: Streaming Audio Documentation
+- **`Streaming_Mic_Manager_README.md`**: Complete guide for real-time voice control with StreamingMicManager
+- **`Migration_Guide_MicManager.md`**: How to migrate from legacy MicManager to StreamingMicManager
+- **`../config/usb_microphone_config.md`**: USB microphone hardware configuration and troubleshooting
+
 ### Arduino Motor Control
 - **Firmware**: `../Arduino/motor_controller/motor_controller.ino`
 - **Hardware**: Arduino Nano with dual PWM ESC motor control

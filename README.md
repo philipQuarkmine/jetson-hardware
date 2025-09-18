@@ -7,10 +7,11 @@ This repository provides Python libraries and managers for controlling Jetson Or
 ## Structure
 
 - **Managers/**: High-level hardware management modules
-	- `LED_Manager.py`, `OLED_Manager.py`, `Mic_Manager.py`, `Speaker_Manager.py`
+	- `LED_Manager.py`, `OLED_Manager.py`, `Mic_Manager.py`, `Mic_Manager_Streaming.py`, `Speaker_Manager.py`
 	- Provide exclusive, thread-safe access to hardware devices
 	- Always use `acquire()` and `release()` for safe access
 	- Designed for integration into multiple projects without conflicts
+	- **NEW**: `Mic_Manager_Streaming.py` provides real-time voice activity detection and streaming audio
 
 - **Libs/**: Low-level hardware interface libraries
 	- `CubeNanoLib.py`, `OledLib.py`, `MicLib.py`, `SpeakerLib.py`
@@ -42,6 +43,21 @@ This repository provides Python libraries and managers for controlling Jetson Or
 	led.acquire()
 	led.set_effect(effect=1, speed=2, color=6)
 	led.release()
+	```
+- **For Real-time Voice Control** use the new Streaming Mic Manager:
+	```python
+	from Managers.Mic_Manager_Streaming import StreamingMicManager
+	mic = StreamingMicManager()
+	mic.acquire()
+	
+	# Set up voice activity detection callback
+	def on_speech_detected(audio_data, sample_rate):
+		print(f"Speech detected: {len(audio_data)} samples")
+	
+	mic.start_voice_detection(callback=on_speech_detected)
+	# ... your voice processing logic ...
+	mic.stop_voice_detection()
+	mic.release()
 	```
 - **Never call Libs directly** unless you know what you're doing; always use Managers for thread/process safety.
 

@@ -26,3 +26,9 @@ Thumbs.db
 
 # Project
 recordings/
+
+# Secrets and API Keys
+.secrets/
+*.key
+*.secret
+**/.secrets/
