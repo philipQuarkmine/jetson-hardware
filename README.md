@@ -7,12 +7,13 @@ This repository provides Python libraries and managers for controlling Jetson Or
 ## Structure
 
 - **Managers/**: High-level hardware management modules
-	- `LED_Manager.py`, `OLED_Manager.py`, `Mic_Manager.py`, `Mic_Manager_Streaming.py`, `Speaker_Manager.py`, `TrainingDongle_Manager.py`
+	- `LED_Manager.py`, `OLED_Manager.py`, `Mic_Manager.py`, `Mic_Manager_Streaming.py`, `Speaker_Manager.py`, `TrainingDongle_Manager.py`, `ArduinoMotor_Manager.py`
 	- Provide exclusive, thread-safe access to hardware devices
 	- Always use `acquire()` and `release()` for safe access
 	- Designed for integration into multiple projects without conflicts
 	- **NEW**: `Mic_Manager_Streaming.py` provides real-time voice activity detection and streaming audio
 	- **NEW**: `TrainingDongle_Manager.py` provides 4-key USB feedback system for robot training
+	- **NEW**: `ArduinoMotor_Manager.py` provides real-time dual motor control via Arduino Nano
 
 - **Libs/**: Low-level hardware interface libraries
 	- `CubeNanoLib.py`, `OledLib.py`, `MicLib.py`, `SpeakerLib.py`, `TrainingDongleLib.py`
@@ -30,6 +31,7 @@ This repository provides Python libraries and managers for controlling Jetson Or
 - **SimpleTests/**: Test scripts for individual hardware components
 	- `test_led.py`, `test_mic.py`, `test_oled.py`, `test_speaker.py`, `test_training_dongle.py`
 	- `test_arduinoNano_motors.py`: Comprehensive Arduino motor control testing
+	- `test_arduino_motor_manager.py`: Test the new ArduinoMotor_Manager integration
 - `setup.py`: Python package setup
 - `.gitignore`: Standard Python ignores
 - `README.md`: Project overview
@@ -76,13 +78,32 @@ This repository provides Python libraries and managers for controlling Jetson Or
 	trainer.stop_feedback_monitoring()
 	trainer.release()
 	```
+
+- **Arduino Motor Control**: Real-time dual motor control for robot movement
+	```python
+	from Managers.ArduinoMotor_Manager import ArduinoMotorManager
+	motors = ArduinoMotorManager()
+	motors.acquire()
+	
+	# Primary interface for LLM training (direct speed control)
+	motors.set_motor_speeds(left=50, right=-30)  # Custom movement patterns
+	
+	# High-level helpers for initial training
+	motors.move_forward(speed=40)     # Both motors forward
+	motors.turn_right(speed=30)       # Left motor forward, right stopped
+	motors.emergency_stop()           # Immediate safety stop
+	
+	motors.release()
+	```
 - **Never call Libs directly** unless you know what you're doing; always use Managers for thread/process safety.
 
 ### Arduino Motor Control
 - **Hardware**: Arduino Nano with dual PWM ESCs for motor control
+- **Manager**: `ArduinoMotor_Manager.py` provides thread-safe, real-time motor control
 - **Connection**: USB serial communication at 115200 baud
+- **Interface**: Direct speed control (-100% to +100%) for LLM training + high-level helpers
 - **Safety**: Built-in watchdog timer and emergency stop functionality
-- **Testing**: Use `SimpleTests/test_arduinoNano_motors.py` for comprehensive motor testing
+- **Testing**: Use `SimpleTests/test_arduino_motor_manager.py` for manager testing
 
 #### Arduino Motor Commands
 ```python
