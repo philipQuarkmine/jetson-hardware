@@ -19,6 +19,10 @@ This folder contains documentation and hardware references for Jetson Orin Nano 
 - **`Migration_Guide_MicManager.md`**: How to migrate from legacy MicManager to StreamingMicManager
 - **`../config/usb_microphone_config.md`**: USB microphone hardware configuration and troubleshooting
 
+### NEW: Robot Training Documentation
+- **`TrainingDongle_README.md`**: Complete guide for 4-key USB training dongle system
+- Robot feedback collection and LLM training data generation
+
 ### Arduino Motor Control
 - **Firmware**: `../Arduino/motor_controller/motor_controller.ino`
 - **Hardware**: Arduino Nano with dual PWM ESC motor control

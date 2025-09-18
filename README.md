@@ -7,15 +7,16 @@ This repository provides Python libraries and managers for controlling Jetson Or
 ## Structure
 
 - **Managers/**: High-level hardware management modules
-	- `LED_Manager.py`, `OLED_Manager.py`, `Mic_Manager.py`, `Mic_Manager_Streaming.py`, `Speaker_Manager.py`
+	- `LED_Manager.py`, `OLED_Manager.py`, `Mic_Manager.py`, `Mic_Manager_Streaming.py`, `Speaker_Manager.py`, `TrainingDongle_Manager.py`
 	- Provide exclusive, thread-safe access to hardware devices
 	- Always use `acquire()` and `release()` for safe access
 	- Designed for integration into multiple projects without conflicts
 	- **NEW**: `Mic_Manager_Streaming.py` provides real-time voice activity detection and streaming audio
+	- **NEW**: `TrainingDongle_Manager.py` provides 4-key USB feedback system for robot training
 
 - **Libs/**: Low-level hardware interface libraries
-	- `CubeNanoLib.py`, `OledLib.py`, `MicLib.py`, `SpeakerLib.py`
-	- Directly interact with hardware (I2C, ALSA, etc.)
+	- `CubeNanoLib.py`, `OledLib.py`, `MicLib.py`, `SpeakerLib.py`, `TrainingDongleLib.py`
+	- Directly interact with hardware (I2C, ALSA, USB HID, etc.)
 	- Should only be used via Managers to avoid resource conflicts
 
 - **Arduino/**: Arduino firmware for external hardware control
@@ -27,7 +28,7 @@ This repository provides Python libraries and managers for controlling Jetson Or
 - **docs/**: Documentation and hardware references
 	- `hardware_reference.pdf`, `README.md`, and migrated docs from CubeNano/MicSpeakers
 - **SimpleTests/**: Test scripts for individual hardware components
-	- `test_led.py`, `test_mic.py`, `test_oled.py`, `test_speaker.py`
+	- `test_led.py`, `test_mic.py`, `test_oled.py`, `test_speaker.py`, `test_training_dongle.py`
 	- `test_arduinoNano_motors.py`: Comprehensive Arduino motor control testing
 - `setup.py`: Python package setup
 - `.gitignore`: Standard Python ignores
@@ -58,6 +59,22 @@ This repository provides Python libraries and managers for controlling Jetson Or
 	# ... your voice processing logic ...
 	mic.stop_voice_detection()
 	mic.release()
+	```
+- **For Robot Training Feedback** use the Training Dongle Manager:
+	```python
+	from Managers.TrainingDongle_Manager import TrainingDongleManager
+	trainer = TrainingDongleManager()
+	trainer.acquire()
+	
+	# Set up feedback callback  
+	def on_feedback(event):
+		emojis = {1: "😍", 2: "😊", 3: "😬", 4: "💥"}
+		print(f"Trainer feedback: {event.score.name} {emojis[event.score.value]} (Key {event.key_number})")
+	
+	trainer.start_feedback_monitoring(callback=on_feedback)
+	# ... robot performs actions while trainer provides feedback ...
+	trainer.stop_feedback_monitoring()
+	trainer.release()
 	```
 - **Never call Libs directly** unless you know what you're doing; always use Managers for thread/process safety.
 
