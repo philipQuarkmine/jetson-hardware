@@ -22,7 +22,7 @@ except ImportError:
     sd = None
     print("WARNING: sounddevice not installed. Install with: pip install sounddevice")
 
-from Libs.MicLib import MicLib
+from MicLib import MicLib
 
 
 class StreamingMicManager:
@@ -101,6 +101,44 @@ class StreamingMicManager:
         self._mic = MicLib(base_dir=self.base_dir, audio_device=self.audio_device)
         
         self._setup_logging(log_path)
+    
+    def set_pre_recording_duration(self, duration_seconds: float):
+        """
+        Set the pre-recording buffer duration and rebuild the buffer.
+        This ensures proper encapsulation of buffer management.
+        
+        Args:
+            duration_seconds: Duration in seconds to buffer before speech detection
+        """
+        self.pre_recording_duration = max(0.1, min(duration_seconds, 5.0))  # Clamp between 0.1s and 5s
+        
+        # Rebuild buffer with new size
+        new_buffer_size = int(self.pre_recording_duration * self.sample_rate / self.chunk_size)
+        self.pre_recording_buffer = deque(maxlen=new_buffer_size)
+        
+        self.logger.info(f"Pre-recording buffer updated: {self.pre_recording_duration}s ({new_buffer_size} chunks)")
+    
+    def get_buffer_info(self) -> dict:
+        """
+        Get current buffer configuration information.
+        
+        Returns:
+            dict: Buffer configuration details
+        """
+        buffer_size = len(self.pre_recording_buffer) if hasattr(self.pre_recording_buffer, '__len__') else self.pre_recording_buffer.maxlen
+        chunks_per_second = self.sample_rate / self.chunk_size
+        actual_duration = buffer_size / chunks_per_second if buffer_size else 0
+        
+        return {
+            "duration_seconds": self.pre_recording_duration,
+            "buffer_size_chunks": self.pre_recording_buffer.maxlen if self.pre_recording_buffer else 0,
+            "current_chunks": len(self.pre_recording_buffer) if self.pre_recording_buffer else 0,
+            "actual_duration_seconds": actual_duration,
+            "sample_rate": self.sample_rate,
+            "chunk_size": self.chunk_size,
+            "chunks_per_second": chunks_per_second,
+            "memory_usage_bytes": (self.pre_recording_buffer.maxlen * self.chunk_size * 4) if self.pre_recording_buffer else 0  # float32 = 4 bytes
+        }
         
         if sd is None:
             logging.error("sounddevice not available - streaming features disabled")

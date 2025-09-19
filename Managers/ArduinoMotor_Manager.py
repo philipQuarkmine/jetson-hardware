@@ -311,7 +311,7 @@ class ArduinoMotorManager:
 
     # HIGH-LEVEL HELPERS: Basic movements (for initial training)
     
-    def move_forward(self, speed: int = 40) -> bool:
+    def move_forward(self, speed: int = 15) -> bool:
         """
         Move robot forward (both motors positive speed).
         
@@ -324,7 +324,7 @@ class ArduinoMotorManager:
         speed = max(1, min(100, abs(speed)))
         return self.set_motor_speeds(left=speed, right=speed)
 
-    def move_reverse(self, speed: int = 40) -> bool:
+    def move_reverse(self, speed: int = 15) -> bool:
         """
         Move robot in reverse (both motors negative speed).
         
@@ -337,7 +337,7 @@ class ArduinoMotorManager:
         speed = max(1, min(100, abs(speed)))
         return self.set_motor_speeds(left=-speed, right=-speed)
 
-    def turn_right(self, speed: int = 30) -> bool:
+    def turn_right(self, speed: int = 15) -> bool:
         """
         Turn robot right (left motor forward, right motor stopped).
         
@@ -350,7 +350,7 @@ class ArduinoMotorManager:
         speed = max(1, min(100, abs(speed)))
         return self.set_motor_speeds(left=speed, right=0)
 
-    def turn_left(self, speed: int = 30) -> bool:
+    def turn_left(self, speed: int = 15) -> bool:
         """
         Turn robot left (right motor forward, left motor stopped).
         

@@ -42,7 +42,7 @@ from typing import Optional, Callable, List, Dict, Any
 from datetime import datetime, timedelta
 from collections import deque
 
-from Libs.TrainingDongleLib import TrainingDongleLib, KeyEvent, TrainingScore
+from TrainingDongleLib import TrainingDongleLib, KeyEvent, TrainingScore
 
 
 class TrainingDongleManager:
@@ -373,9 +373,13 @@ class TrainingDongleManager:
         initial_count = len(self._feedback_history)
         
         while (time.time() - start_time) < timeout:
-            if len(self._feedback_history) > initial_count:
-                return self._feedback_history[-1]
-            time.sleep(0.1)
+                if len(self._feedback_history) > initial_count:
+                    # Only return the first new KeyEvent with event_type == 'press'
+                    for event in list(self._feedback_history)[initial_count:]:
+                        if hasattr(event, 'event_type') and event.event_type == 'press':
+                            return event
+                    # If no 'press' event found, keep waiting
+                time.sleep(0.1)
         
         return None
     
