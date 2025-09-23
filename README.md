@@ -1,170 +1,277 @@
 
-# Jetson Orin Nano Hardware Management
+# Jetson Orin Nano Hardware & AI Management
 
-This repository provides Python libraries and managers for controlling Jetson Orin Nano hardware components, including LED, OLED, microphone, speaker modules, and Arduino-based motor control.
+This repository provides Python libraries and managers for controlling Jetson Orin Nano hardware components and local AI services, including LED, OLED, microphone, speaker modules, Arduino-based motor control, and local LLM management via Ollama.
 
+## Quick Start
 
-## Structure
-
-- **Managers/**: High-level hardware management modules
-	- `LED_Manager.py`, `OLED_Manager.py`, `Mic_Manager.py`, `Mic_Manager_Streaming.py`, `Speaker_Manager.py`, `TrainingDongle_Manager.py`, `ArduinoMotor_Manager.py`
-	- Provide exclusive, thread-safe access to hardware devices
-	- Always use `acquire()` and `release()` for safe access
-	- Designed for integration into multiple projects without conflicts
-	- **NEW**: `Mic_Manager_Streaming.py` provides real-time voice activity detection and streaming audio
-	- **NEW**: `TrainingDongle_Manager.py` provides 4-key USB feedback system for robot training
-	- **NEW**: `ArduinoMotor_Manager.py` provides real-time dual motor control via Arduino Nano
-
-- **Libs/**: Low-level hardware interface libraries
-	- `CubeNanoLib.py`, `OledLib.py`, `MicLib.py`, `SpeakerLib.py`, `TrainingDongleLib.py`
-	- Directly interact with hardware (I2C, ALSA, USB HID, etc.)
-	- Should only be used via Managers to avoid resource conflicts
-
-- **Arduino/**: Arduino firmware for external hardware control
-	- `motor_controller/`: Dual motor control via PWM ESCs
-		- Arduino Nano firmware with serial communication
-		- Watchdog timer and emergency stop functionality
-		- PWM ESC control for left/right motors with direction indicators
-
-- **docs/**: Documentation and hardware references
-	- `hardware_reference.pdf`, `README.md`, and migrated docs from CubeNano/MicSpeakers
-- **SimpleTests/**: Test scripts for individual hardware components
-	- `test_led.py`, `test_mic.py`, `test_oled.py`, `test_speaker.py`, `test_training_dongle.py`
-	- `test_arduinoNano_motors.py`: Comprehensive Arduino motor control testing
-	- `test_arduino_motor_manager.py`: Test the new ArduinoMotor_Manager integration
-- `setup.py`: Python package setup
-- `.gitignore`: Standard Python ignores
-- `README.md`: Project overview
-
-## Usage & Best Practices
-
-### Jetson Hardware Managers
-- **Import Managers** in your application for hardware access:
-	```python
-	from Managers.LED_Manager import LEDManager
-	led = LEDManager()
-	led.acquire()
-	led.set_effect(effect=1, speed=2, color=6)
-	led.release()
-	```
-- **For Real-time Voice Control** use the new Streaming Mic Manager:
-	```python
-	from Managers.Mic_Manager_Streaming import StreamingMicManager
-	mic = StreamingMicManager()
-	mic.acquire()
-	
-	# Set up voice activity detection callback
-	def on_speech_detected(audio_data, sample_rate):
-		print(f"Speech detected: {len(audio_data)} samples")
-	
-	mic.start_voice_detection(callback=on_speech_detected)
-	# ... your voice processing logic ...
-	mic.stop_voice_detection()
-	mic.release()
-	```
-- **For Robot Training Feedback** use the Training Dongle Manager:
-	```python
-	from Managers.TrainingDongle_Manager import TrainingDongleManager
-	trainer = TrainingDongleManager()
-	trainer.acquire()
-	
-	# Set up feedback callback  
-	def on_feedback(event):
-		emojis = {1: "😍", 2: "😊", 3: "😬", 4: "💥"}
-		print(f"Trainer feedback: {event.score.name} {emojis[event.score.value]} (Key {event.key_number})")
-	
-	trainer.start_feedback_monitoring(callback=on_feedback)
-	# ... robot performs actions while trainer provides feedback ...
-	trainer.stop_feedback_monitoring()
-	trainer.release()
-	```
-
-- **Arduino Motor Control**: Real-time dual motor control for robot movement
-	```python
-	from Managers.ArduinoMotor_Manager import ArduinoMotorManager
-	motors = ArduinoMotorManager()
-	motors.acquire()
-	
-	# Primary interface for LLM training (direct speed control)
-	motors.set_motor_speeds(left=50, right=-30)  # Custom movement patterns
-	
-	# High-level helpers for initial training
-	motors.move_forward(speed=40)     # Both motors forward
-	motors.turn_right(speed=30)       # Left motor forward, right stopped
-	motors.emergency_stop()           # Immediate safety stop
-	
-	motors.release()
-	```
-- **Never call Libs directly** unless you know what you're doing; always use Managers for thread/process safety.
-
-### Arduino Motor Control
-- **Hardware**: Arduino Nano with dual PWM ESCs for motor control
-- **Manager**: `ArduinoMotor_Manager.py` provides thread-safe, real-time motor control
-- **Connection**: USB serial communication at 115200 baud
-- **Interface**: Direct speed control (-100% to +100%) for LLM training + high-level helpers
-- **Safety**: Built-in watchdog timer and emergency stop functionality
-- **Testing**: Use `SimpleTests/test_arduino_motor_manager.py` for manager testing
-
-#### Arduino Motor Commands
 ```python
-import serial
-arduino = serial.Serial('/dev/ttyUSB0', 115200, timeout=1)
+# Hardware control
+from Managers.LED_Manager import LEDManager
+from Managers.ArduinoMotor_Manager import ArduinoMotorManager
 
-# Test connection
-arduino.write(b'PING\n')
-response = arduino.readline().decode().strip()  # Should return "PONG"
+# AI services
+from Managers.LocalLLM_Manager import LocalLLMManager
 
-# Control motors (speed: -100 to 100, duration in ms)
-arduino.write(b'MOTOR_RIGHT:50:2000\n')  # Right motor 50% for 2 seconds
-arduino.write(b'MOTOR_LEFT:-30:1500\n')  # Left motor reverse 30% for 1.5 seconds
-arduino.write(b'MOTOR_BOTH:75:3000\n')  # Both motors 75% for 3 seconds
-arduino.write(b'EMERGENCY_STOP\n')      # Immediate stop
+# Hardware
+led = LEDManager()
+led.acquire()
+led.set_effect(effect=1, speed=2, color=6)
+led.release()
+
+# Local AI
+llm = LocalLLMManager()
+llm.start_service()
+response = llm.generate("Hello, how are you?", "llama3.2:3b")
+print(response['text'])
+llm.cleanup()
 ```
 
-### Development Guidelines
-- **Do not modify method signatures** in Libs/Managers unless you update all dependent projects.
-- **Keep API stable**: If you need to change a method, consider adding a new method instead of changing/removing existing ones.
-- **Document any changes** to Libs/Managers in the README and code docstrings.
+## Core Components
+
+### 🤖 AI Services - LocalLLM_Manager
+**Purpose**: Simple, focused manager for local LLM service with streaming support
+
+```python
+from Managers.LocalLLM_Manager import LocalLLMManager
+
+# Basic usage
+llm = LocalLLMManager()
+llm.start_service()
+
+# List available models
+models = llm.list_models()
+print(f"Available models: {models}")
+
+# Generate response
+result = llm.generate("What is the capital of France?", "llama3.2:3b")
+if result['ok']:
+    print(f"Response: {result['text']} (took {result['time_s']:.2f}s)")
+
+# Streaming responses (real-time)
+response = llm.generate_stream("Tell me a story", "llama3.2:3b")
+for chunk in response.iter_lines():
+    if chunk:
+        data = json.loads(chunk.decode('utf-8'))
+        if not data.get('done', False):
+            print(data.get('response', ''), end='', flush=True)
+
+# Performance optimization
+llm.keep_model_warm("llama3.2:3b")  # Keep model loaded for instant responses
+llm.clear_model_cache()              # Free GPU memory when needed
+
+# Always cleanup
+llm.cleanup()
+```
+
+**Key Features**:
+- ✅ **Simple & Focused**: Single responsibility - manage Ollama service
+- ✅ **Streaming Support**: Real-time word-by-word responses via `generate_stream()`
+- ✅ **Performance Tools**: Model warming and cache management
+- ✅ **GPU Optimized**: Configured for Jetson with `OLLAMA_FLASH_ATTENTION=1`
+- ✅ **Non-Aggressive**: Respects existing ollama instances
+- ✅ **Clean Architecture**: Provides tools, UI programs handle their own concerns
+
+**Interactive Chat Example**:
+```bash
+cd /home/phiip/jetson-hardware
+python3 SimpleTests/interactive_chat.py
+```
+Features real-time streaming, model switching, chat history, and responsive user experience.
+
+### 🔧 Hardware Managers
+
+#### LED & Display Control
+```python
+from Managers.LED_Manager import LEDManager
+from Managers.OLED_Manager import OLEDManager
+
+# LED control
+led = LEDManager()
+led.acquire()
+led.set_effect(effect=1, speed=2, color=6)
+led.release()
+
+# OLED display
+oled = OLEDManager()
+oled.acquire()
+oled.display_text("Hello World!")
+oled.release()
+```
+
+#### Audio Processing
+```python
+from Managers.Mic_Manager_Streaming import StreamingMicManager
+from Managers.Speaker_Manager import SpeakerManager
+
+# Real-time voice detection
+mic = StreamingMicManager()
+mic.acquire()
+
+def on_speech_detected(audio_data, sample_rate):
+    print(f"Speech detected: {len(audio_data)} samples")
+
+mic.start_voice_detection(callback=on_speech_detected)
+# ... voice processing ...
+mic.stop_voice_detection()
+mic.release()
+```
+
+#### Robot Motor Control
+```python
+from Managers.ArduinoMotor_Manager import ArduinoMotorManager
+
+motors = ArduinoMotorManager()
+motors.acquire()
+
+# Direct speed control (ideal for LLM training)
+motors.set_motor_speeds(left=50, right=-30)
+
+# High-level movement helpers
+motors.move_forward(speed=40)
+motors.turn_right(speed=30)
+motors.emergency_stop()
+
+motors.release()
+```
+
+#### Training Feedback System
+```python
+from Managers.TrainingDongle_Manager import TrainingDongleManager
+
+trainer = TrainingDongleManager()
+trainer.acquire()
+
+def on_feedback(event):
+    emojis = {1: "😍", 2: "😊", 3: "😬", 4: "💥"}
+    print(f"Feedback: {event.score.name} {emojis[event.score.value]}")
+
+trainer.start_feedback_monitoring(callback=on_feedback)
+# ... robot performs actions while trainer provides feedback ...
+trainer.stop_feedback_monitoring()
+trainer.release()
+```
+
+## Architecture Philosophy
+
+> **"Good programs do clear tasks very well"**
+
+Each manager has a **single responsibility**:
+- **LocalLLM_Manager**: Service management + streaming tools
+- **Interactive_Chat**: UI concerns + user experience  
+- **Hardware Managers**: Exclusive, thread-safe hardware access
+- **Libraries**: Low-level hardware interfaces
+
+## Project Structure
+
+```
+jetson-hardware/
+├── Managers/                    # High-level managers
+│   ├── LocalLLM_Manager.py     # 🤖 Local AI service management
+│   ├── LED_Manager.py          # LED control
+│   ├── OLED_Manager.py         # Display management
+│   ├── Mic_Manager_Streaming.py # Real-time audio
+│   ├── Speaker_Manager.py      # Audio output
+│   ├── ArduinoMotor_Manager.py # Motor control
+│   └── TrainingDongle_Manager.py # Feedback system
+├── Libs/                       # Low-level hardware interfaces
+├── SimpleTests/                # Test & example programs
+│   └── interactive_chat.py     # 🚀 Streaming chat interface
+├── Arduino/                    # Arduino firmware
+└── docs/                       # Documentation
+```
+
+## Integration Guide for Other Programs
+
+### Using LocalLLM_Manager in Your Projects
+
+The `LocalLLM_Manager` is designed to be imported and used by other programs:
+
+```python
+from Managers.LocalLLM_Manager import LocalLLMManager
+
+# In your application
+class MyAIApp:
+    def __init__(self):
+        self.llm = LocalLLMManager()
+        
+    def start(self):
+        self.llm.start_service()
+        
+    def chat(self, message, model="llama3.2:3b"):
+        return self.llm.generate(message, model)
+        
+    def stream_chat(self, message, model="llama3.2:3b"):
+        # Returns raw requests.Response for streaming
+        return self.llm.generate_stream(message, model)
+        
+    def cleanup(self):
+        self.llm.cleanup()
+```
+
+### Best Practices
+
+1. **Always call `cleanup()`** when your program exits
+2. **Use `generate_stream()`** for real-time user interfaces
+3. **Use `keep_model_warm()`** for responsive interactions
+4. **Handle your own UI buffering** - manager provides raw streams
+5. **Import the manager** - don't try to manage ollama yourself
+
+### Hardware Integration
+
+```python
+# Thread-safe hardware access
+manager.acquire()
+try:
+    # Your hardware operations
+    manager.some_operation()
+finally:
+    manager.release()
+```
+
+## Installation & Setup
+
+### Prerequisites
+- Jetson Orin Nano with JetPack
+- Python 3.8+
+- Ollama (for AI features)
+
+### Setup
+```bash
+# Clone repository
+git clone <repo-url>
+cd jetson-hardware
+
+# Install dependencies
+pip install -r requirements.txt
+
+# For AI features, install Ollama
+curl -fsSL https://ollama.ai/install.sh | sh
+
+# Pull an AI model
+ollama pull llama3.2:3b
+```
+
+### Test Installation
+```bash
+# Test hardware (if connected)
+python3 SimpleTests/test_led.py
+
+# Test AI services
+python3 SimpleTests/interactive_chat.py
+```
+
+## Development Guidelines
+
+- **Stable APIs**: Don't modify method signatures without updating all dependent projects
+- **Single Responsibility**: Each manager does one thing well
+- **Thread Safety**: Always use `acquire()`/`release()` for hardware
+- **Clean Architecture**: Separate concerns between service management and UI
 
 ## License
-MIT
 
-## Getting Started
+MIT License - See LICENSE file for details
 
-### Jetson Hardware Setup
-1. Clone the repository
-2. Install dependencies (see `setup.py`)
-3. Review documentation in `docs/`
+---
 
-### Arduino Motor Control Setup
-1. **Hardware Requirements**:
-   - Arduino Nano (or compatible)
-   - 2x PWM ESCs for motor control
-   - USB cable for serial communication
-
-2. **Arduino Setup**:
-   ```bash
-   # Install Arduino CLI (if not already installed)
-   curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
-   
-   # Install AVR core
-   arduino-cli core install arduino:avr
-   
-   # Install Servo library
-   arduino-cli lib install Servo
-   
-   # Compile and upload firmware
-   cd Arduino/motor_controller
-   arduino-cli compile --fqbn arduino:avr:nano motor_controller.ino
-   arduino-cli upload -p /dev/ttyUSB0 --fqbn arduino:avr:nano motor_controller.ino
-   ```
-
-3. **Test Motor Control**:
-   ```bash
-   cd SimpleTests
-   python test_arduinoNano_motors.py
-   ```
-
-## License
-
-MIT
+**🚀 Ready to build intelligent hardware applications with streaming AI and responsive controls!**
