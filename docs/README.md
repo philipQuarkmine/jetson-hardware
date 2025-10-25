@@ -23,6 +23,14 @@ This folder contains documentation and hardware references for Jetson Orin Nano 
 - **`TrainingDongle_README.md`**: Complete guide for 4-key USB training dongle system
 - Robot feedback collection and LLM training data generation
 
+### NEW: Display System Documentation  
+- **`Display_Manager_README.md`**: Complete guide for framebuffer display management
+- Hardware-accelerated graphics with threading and GStreamer integration
+
+### Development Environment
+- **`Development_Environment_Setup.md`**: 🛠️ Complete development environment setup
+- VS Code configuration, Ruff linting, hardware-optimized coding standards
+
 ### Arduino Motor Control
 - **Firmware**: `../Arduino/motor_controller/motor_controller.ino`
 - **Hardware**: Arduino Nano with dual PWM ESC motor control

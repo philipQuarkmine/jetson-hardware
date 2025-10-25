@@ -166,19 +166,29 @@ Each manager has a **single responsibility**:
 
 ```
 jetson-hardware/
-├── Managers/                    # High-level managers
-│   ├── LocalLLM_Manager.py     # 🤖 Local AI service management
-│   ├── LED_Manager.py          # LED control
-│   ├── OLED_Manager.py         # Display management
+├── .vscode/                    # 🛠️ VS Code configuration
+│   └── settings.json          #    Ruff + hardware dev settings
+├── Managers/                   # High-level managers  
+│   ├── LocalLLM_Manager.py    # 🤖 Local AI service management
+│   ├── LED_Manager.py         # LED control
+│   ├── OLED_Manager.py        # Display management
+│   ├── Display_Manager.py     # 📺 Framebuffer display system
 │   ├── Mic_Manager_Streaming.py # Real-time audio
-│   ├── Speaker_Manager.py      # Audio output
+│   ├── Speaker_Manager.py     # Audio output
 │   ├── ArduinoMotor_Manager.py # Motor control
 │   └── TrainingDongle_Manager.py # Feedback system
-├── Libs/                       # Low-level hardware interfaces
-├── SimpleTests/                # Test & example programs
-│   └── interactive_chat.py     # 🚀 Streaming chat interface
-├── Arduino/                    # Arduino firmware
-└── docs/                       # Documentation
+├── Libs/                      # Low-level hardware interfaces
+│   ├── DisplayLib.py          # 📺 Direct framebuffer access
+│   └── [Other hardware libs]  # Hardware-specific interfaces
+├── SimpleTests/               # Test & example programs
+│   ├── interactive_chat.py    # 🚀 Streaming chat interface
+│   └── test_display_manager.py # Display system testing
+├── Arduino/                   # Arduino firmware
+├── docs/                      # Documentation
+│   └── Development_Environment_Setup.md # 🛠️ Dev setup guide
+├── pyproject.toml            # 🔧 Ruff linting configuration
+├── pyrightconfig.json        # 🔧 Type checking configuration  
+└── README.md                 # This file
 ```
 
 ## Integration Guide for Other Programs
@@ -261,12 +271,54 @@ python3 SimpleTests/test_led.py
 python3 SimpleTests/interactive_chat.py
 ```
 
+## Development Environment
+
+### VS Code Setup (Recommended)
+This project is optimized for VS Code with **Ruff linter** for hardware/robotics development:
+
+**Required Extensions:**
+- ✅ **Ruff** (`charliermarsh.ruff`) - Primary linter and formatter
+- ✅ **Python** (`ms-python.python`) - Core Python support
+- ✅ **Python Debugger** (`ms-python.debugpy`) - Debugging
+- ✅ **Python Environments** (`ms-python.vscode-pylance`) - Environment management
+
+**Extensions to Uninstall** (to prevent conflicts):
+- ❌ **Pylance** - Too strict for hardware code
+- ❌ **Pylint** - Conflicts with Ruff configuration
+
+**Auto-Configuration:**
+The project includes pre-configured files:
+- `.vscode/settings.json` - VS Code settings optimized for Jetson development
+- `pyproject.toml` - Ruff configuration with hardware-friendly rules
+- `pyrightconfig.json` - Type checking configuration
+
+### Code Style & Standards
+
+**Formatting:** Auto-formatted with Ruff (88-100 character lines)
+**Import Organization:** Automatic import sorting on save
+**Type Hints:** Optional (hardware code often requires dynamic typing)
+**Error Handling:** Explicit try/except preferred over `contextlib.suppress`
+
+```python
+# ✅ Hardware-friendly patterns
+try:
+    hardware.some_operation()
+except:  # Broad exception for hardware reliability
+    pass
+
+# ✅ Hardware register access
+GPIO_BASE = 0x7E200000  # Direct hardware addresses OK
+register_value = ctypes.c_uint32.from_address(GPIO_BASE + offset)
+```
+
 ## Development Guidelines
 
 - **Stable APIs**: Don't modify method signatures without updating all dependent projects
-- **Single Responsibility**: Each manager does one thing well
+- **Single Responsibility**: Each manager does one thing well  
 - **Thread Safety**: Always use `acquire()`/`release()` for hardware
 - **Clean Architecture**: Separate concerns between service management and UI
+- **Hardware-First**: Code style prioritizes hardware reliability over strict typing
+- **Ruff Compliance**: All code auto-formatted and linted with robotics-optimized rules
 
 ## License
 
