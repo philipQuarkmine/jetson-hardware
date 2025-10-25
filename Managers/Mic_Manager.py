@@ -2,14 +2,16 @@
 # Mic Manager for Jetson Orin Nano
 
 
-import threading
+import fcntl
 import logging
+import os
 import signal
 import sys
-import os
+import threading
 import time
-import fcntl
+
 from Libs.MicLib import MicLib
+
 
 class MicManager:
 	def get_sound_level(self, duration=1, threshold=500):

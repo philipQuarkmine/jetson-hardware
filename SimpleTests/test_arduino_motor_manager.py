@@ -8,9 +8,11 @@ and high-level movement helpers.
 
 import sys
 import time
+
 sys.path.append('/home/phiip/jetson-hardware')
 
 from Managers.ArduinoMotor_Manager import ArduinoMotorManager
+
 
 def test_direct_speed_control(manager):
     """Test direct speed control (primary LLM interface)."""

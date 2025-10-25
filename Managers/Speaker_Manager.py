@@ -2,14 +2,16 @@
 # Speaker Manager for Jetson Orin Nano
 
 
-import threading
+import fcntl
 import logging
+import os
 import signal
 import sys
-import os
+import threading
 import time
-import fcntl
+
 from Libs.SpeakerLib import SpeakerLib
+
 
 class SpeakerManager:
 	_lock = threading.Lock()

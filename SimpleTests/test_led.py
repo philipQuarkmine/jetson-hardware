@@ -1,6 +1,6 @@
 import time
-from Managers.LED_Manager import LEDManager
 
+from Managers.LED_Manager import LEDManager
 
 led = LEDManager()
 led.acquire()

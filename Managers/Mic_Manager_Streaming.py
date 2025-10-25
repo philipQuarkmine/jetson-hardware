@@ -3,18 +3,19 @@ Enhanced Mic Manager for Jetson Orin Nano with Real-time Streaming STT
 Supports voice activity detection, auto-calibrating thresholds, and streaming audio processing.
 """
 
-import threading
+import fcntl
 import logging
+import os
+import queue
 import signal
 import sys
-import os
+import threading
 import time
-import fcntl
-import queue
-import numpy as np
-from datetime import datetime, timedelta
-from typing import Optional, Callable, Dict, Any
 from collections import deque
+from datetime import datetime, timedelta
+from typing import Any, Callable, Dict, Optional
+
+import numpy as np
 
 try:
     import sounddevice as sd

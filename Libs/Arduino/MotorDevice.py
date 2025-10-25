@@ -24,10 +24,12 @@ ESC Configuration:
 - 2000µs = full forward
 """
 
-from typing import Optional, Dict, Any
 import time
-from .BaseDevice import ArduinoDevice
+from typing import Any, Dict, Optional
+
 from ..ArduinoLib import ArduinoProtocol
+from .BaseDevice import ArduinoDevice
+
 
 class DCMotor(ArduinoDevice):
     """
@@ -44,7 +46,7 @@ class DCMotor(ArduinoDevice):
     RIGHT_MOTOR = ArduinoProtocol.MOTOR_RIGHT
     
     def __init__(self, device_id: str, arduino_connection, motor_id: int, 
-                 pwm_pin: int, direction_pin: Optional[int] = None):
+                 pwm_pin: int, direction_pin: int | None = None):
         """
         Initialize DC Motor
         

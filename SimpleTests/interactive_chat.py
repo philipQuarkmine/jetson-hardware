@@ -10,10 +10,10 @@ A snappy command-line interface that allows you to:
 """
 
 import json
+import logging
 import os
 import sys
 import time
-import logging
 
 # Add the parent directory to import our manager
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))

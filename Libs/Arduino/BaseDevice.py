@@ -6,9 +6,9 @@ Provides common interface for device management, pin tracking,
 and communication with Arduino.
 """
 
-from abc import ABC, abstractmethod
-from typing import Optional, Dict, Any, TYPE_CHECKING
 import logging
+from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 if TYPE_CHECKING:
     from ..ArduinoLib import ArduinoConnection

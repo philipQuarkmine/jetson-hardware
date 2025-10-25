@@ -13,18 +13,19 @@ Date: 2025-10-25
 Hardware: NVIDIA Jetson Orin Nano with JetPack 6.0
 """
 
+import logging
+import math
 import os
+import random
 import sys
 import time
-import math
-import random
-import logging
 from datetime import datetime
 
 # Add project root to Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from Managers.Display_Manager import DisplayManager
+
 
 def setup_logging():
     """Setup logging configuration."""

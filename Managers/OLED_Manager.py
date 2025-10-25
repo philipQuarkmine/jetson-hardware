@@ -3,7 +3,9 @@
 
 
 import threading
+
 from Libs.OledLib import OledLib
+
 
 class OLEDManager:
 	_lock = threading.Lock()

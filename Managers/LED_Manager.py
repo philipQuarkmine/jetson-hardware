@@ -2,9 +2,11 @@
 # LED Manager for Jetson Orin Nano
 
 
-import time
 import threading
+import time
+
 from Libs.CubeNanoLib import CubeNano
+
 
 class LEDManager:
 	_lock = threading.Lock()

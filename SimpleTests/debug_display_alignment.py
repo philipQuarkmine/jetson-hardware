@@ -9,15 +9,16 @@ Author: AI Assistant
 Date: 2025-10-25
 """
 
+import logging
 import os
 import sys
 import time
-import logging
 
 # Add project root to Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from Managers.Display_Manager import DisplayManager
+
 
 def setup_logging():
     logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')

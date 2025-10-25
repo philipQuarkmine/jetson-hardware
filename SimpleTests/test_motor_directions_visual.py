@@ -8,9 +8,11 @@ Each test waits for user confirmation before proceeding.
 
 import sys
 import time
+
 sys.path.append('/home/phiip/jetson-hardware')
 
 from Managers.ArduinoMotor_Manager import ArduinoMotorManager
+
 
 def wait_for_user(message="Press ENTER to continue..."):
     """Wait for user input with custom message."""

@@ -18,10 +18,11 @@ Safety Features:
 - User confirmation between major test sections
 """
 
-import serial
-import time
 import signal
 import sys
+import time
+
+import serial
 
 # Global variables
 ser = None

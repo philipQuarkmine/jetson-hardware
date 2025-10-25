@@ -27,12 +27,12 @@ Examples:
 """
 
 import argparse
-import sys
-import os
-import time
 import json
+import os
+import sys
+import time
 from datetime import datetime
-from typing import Dict, Any
+from typing import Any, Dict
 
 # Add jetson-hardware to path
 BASE_DIR = os.path.dirname(__file__)
@@ -41,7 +41,7 @@ if JETSON_HW_PATH not in sys.path:
     sys.path.insert(0, JETSON_HW_PATH)
 
 try:
-    from Libs.TrainingDongleLib import TrainingDongleLib, KeyEvent, TrainingScore
+    from Libs.TrainingDongleLib import KeyEvent, TrainingDongleLib, TrainingScore
     from Managers.TrainingDongle_Manager import TrainingDongleManager
 except ImportError as e:
     print(f"Error importing training dongle modules: {e}")

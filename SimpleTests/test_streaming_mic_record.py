@@ -1,8 +1,10 @@
 import sys
 import time
-import numpy as np
-from Managers.Mic_Manager_Streaming import StreamingMicManager
 import wave
+
+import numpy as np
+
+from Managers.Mic_Manager_Streaming import StreamingMicManager
 
 DURATION = 10  # seconds
 OUTPUT_FILE = "test_streaming_mic_record.wav"

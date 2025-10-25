@@ -6,6 +6,7 @@ direct hardware access and optimized operations for various components.
 """
 
 from .DisplayLib import DisplayLib
+
 # Import only available modules to avoid dependency issues
 try:
     from .ArduinoLib import ArduinoLib

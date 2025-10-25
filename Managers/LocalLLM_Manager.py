@@ -15,11 +15,11 @@ Design Principles:
   - Reliable cleanup of only our own processes
 """
 
-import os
-import time
 import logging
+import os
 import subprocess
-from typing import Optional, Dict, Any
+import time
+from typing import Any, Dict, Optional
 
 import requests
 
@@ -97,7 +97,7 @@ class LocalLLMManager:
     
     # ---------- LLM Interface ----------
     def generate(self, prompt: str, model: str = "gemma3:1b", 
-                options: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+                options: Dict[str, Any] | None = None) -> Dict[str, Any]:
         """Generate complete LLM response."""
         # Ensure service is running
         if not self.is_service_running():
@@ -139,7 +139,7 @@ class LocalLLMManager:
             return {"ok": False, "error": str(e), "model": model}
     
     def generate_stream(self, prompt: str, model: str = "gemma3:1b", 
-                       options: Optional[Dict[str, Any]] = None) -> requests.Response:
+                       options: Dict[str, Any] | None = None) -> requests.Response:
         """Return raw streaming response for end program to handle."""
         if not self.is_service_running():
             if not self.start_service_if_needed():

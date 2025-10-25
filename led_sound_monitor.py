@@ -3,11 +3,13 @@ LED Sound Monitor for Jetson Hardware
 Continuously reads sound amplitude and sets LED brightness (purple) accordingly.
 Stops on Ctrl+C.
 """
-import time
-import sys
 import os
-from Managers.Mic_Manager import MicManager
+import sys
+import time
+
 from Managers.LED_Manager import LEDManager
+from Managers.Mic_Manager import MicManager
+
 
 def main():
     logs_dir = os.path.join(os.path.dirname(__file__), "logs")

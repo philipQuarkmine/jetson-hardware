@@ -26,12 +26,14 @@ Future Pin Reservations:
 - Pins A0-A3: Sensor inputs (encoders, current sensing)
 """
 
-import serial
-import time
-import threading
-import logging
-from typing import Optional, Dict, Any
 import json
+import logging
+import threading
+import time
+from typing import Any, Dict, Optional
+
+import serial
+
 
 class ArduinoConnection:
     """
@@ -50,7 +52,7 @@ class ArduinoConnection:
         self.port = port
         self.baudrate = baudrate
         self.timeout = timeout
-        self.serial_conn: Optional[serial.Serial] = None
+        self.serial_conn: serial.Serial | None = None
         self._lock = threading.Lock()
         self._connected = False
         
@@ -115,7 +117,7 @@ class ArduinoConnection:
             
         try:
             with self._lock:
-                command_bytes = f"{command}\n".encode('utf-8')
+                command_bytes = f"{command}\n".encode()
                 self.serial_conn.write(command_bytes)
                 self.serial_conn.flush()
                 return True
@@ -123,7 +125,7 @@ class ArduinoConnection:
             self.logger.error(f"Failed to send command '{command}': {e}")
             return False
     
-    def read_response(self, timeout: Optional[float] = None) -> Optional[str]:
+    def read_response(self, timeout: float | None = None) -> str | None:
         """
         Read response from Arduino
         

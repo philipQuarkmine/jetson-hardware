@@ -1,0 +1,69 @@
+[tool.ruff]
+# Jetson Orin Nano robotics project configuration
+target-version = "py310"
+line-length = 100
+indent-width = 4
+
+# Include common robotics file patterns
+extend-include = ["*.pyx", "*.pyi"]
+
+[tool.ruff.lint]
+# Enable rules appropriate for hardware/robotics development
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings  
+    "F",    # Pyflakes
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear
+    "SIM",  # flake8-simplify
+    "I",    # isort
+]
+
+# Ignore rules that conflict with hardware programming
+ignore = [
+    "E402",   # Module level import not at top (hardware init patterns)
+    "E501",   # Line too long (common in hardware config)
+    "E701",   # Multiple statements on one line (colon) - legacy code
+    "E702",   # Multiple statements on one line (semicolon) - legacy code
+    "E722",   # Bare except (needed for hardware error handling)
+    "E741",   # Ambiguous variable name (short vars common in math/hardware)
+    "W191",   # Indentation contains tabs (legacy code compatibility)
+    "W291",   # Trailing whitespace (auto-format handles this)
+    "W293",   # Blank line contains whitespace (auto-format handles this)
+    "B007",   # Loop control variable not used (hardware polling)
+    "B009",   # Do not call getattr with constant (hardware registers)
+    "B010",   # Do not call setattr with constant (hardware registers) 
+    "B023",   # Function definition does not bind loop variable (common pattern)
+    "F401",   # Imported but unused (hardware libs often conditionally used)
+    "F403",   # Star imports (common in hardware libs)
+    "F405",   # Name may be undefined (hardware conditional imports)
+    "F541",   # f-string without any placeholders (template strings)
+    "F841",   # Local variable assigned but never used (hardware placeholders)
+    "UP006",  # Use dict instead of Dict (Python 3.8 compatibility)
+    "UP007",  # Use X | Y syntax (compatibility with older Python)
+    "UP015",  # Unnecessary mode argument (explicit is better for hardware)
+    "UP024",  # Replace aliased errors (compatibility)
+    "UP035",  # Use dict instead of typing.Dict (Python 3.8 compatibility)
+    "SIM102", # Use single if statement (explicit is clearer for hardware)
+    "SIM105", # contextlib.suppress (prefer explicit for hardware)
+    "SIM108", # Use ternary operator (explicit if-else is clearer)
+    "SIM115", # context manager (file locking needs explicit control)
+    "SIM212", # Use ternary with if-else (readability preference)
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Hardware-specific ignores
+"**/Libs/*.py" = ["F401", "F403", "F405", "B008"]  # Hardware libraries
+"**/Managers/*.py" = ["B008", "B024"]              # Manager patterns  
+"**/SimpleTests/*.py" = ["T201", "B008"]           # Test files can print()
+
+[tool.ruff.lint.isort]
+# Robotics-friendly import organization
+known-first-party = ["Libs", "Managers"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+
+[tool.ruff.format]
+# Format code appropriately for embedded development
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"

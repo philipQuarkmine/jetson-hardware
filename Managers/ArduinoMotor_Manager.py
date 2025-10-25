@@ -37,14 +37,15 @@ Usage:
     manager.release()
 """
 
-import serial
-import threading
 import fcntl
-import time
 import logging
-from typing import Optional, Tuple, Dict, Any
+import threading
+import time
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any, Dict, Optional, Tuple
+
+import serial
 
 
 class MotorStatus(Enum):
@@ -89,7 +90,7 @@ class ArduinoMotorManager:
         self.lock_file_path = "/tmp/arduino_motor_manager.lock"
         
         # Serial communication
-        self.serial_connection: Optional[serial.Serial] = None
+        self.serial_connection: serial.Serial | None = None
         self.communication_lock = threading.Lock()
         
         # Motor state tracking
@@ -210,7 +211,7 @@ class ArduinoMotorManager:
         self.serial_connection = None
         self.current_state.status = MotorStatus.DISCONNECTED
 
-    def _send_command(self, command: str) -> Optional[str]:
+    def _send_command(self, command: str) -> str | None:
         """
         Send command to Arduino and get response.
         

@@ -1,8 +1,10 @@
 
-import os, time
-from PIL import Image, ImageDraw, ImageFont
+import os
+import time
+
 from luma.core.interface.serial import i2c
 from luma.oled.device import ssd1306
+from PIL import Image, ImageDraw, ImageFont
 
 FONT_CANDIDATES = [
 	"/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",

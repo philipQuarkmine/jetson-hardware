@@ -1,0 +1,9 @@
+{
+    "reportMissingImports": "none",
+    "reportMissingTypeStubs": "none", 
+    "reportGeneralTypeIssues": "none",
+    "reportOptionalMemberAccess": "none",
+    "reportOptionalSubscript": "none",
+    "reportPrivateImportUsage": "none",
+    "reportUnusedImport": "information"
+}

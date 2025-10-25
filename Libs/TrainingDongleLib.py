@@ -21,15 +21,15 @@ Features:
 - Auto-detection of training dongle device
 """
 
+import logging
 import os
-import time
-import threading
 import select
 import struct
-import logging
-from typing import Optional, Callable, Dict, Any
+import threading
+import time
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any, Callable, Dict, Optional
 
 
 class TrainingScore(Enum):
@@ -67,8 +67,8 @@ class TrainingDongleLib:
         32: 4,   # KEY_D -> Key 4 (Failure)
     }
     
-    def __init__(self, device_path: Optional[str] = None, 
-                 key_mapping: Optional[Dict[int, int]] = None,
+    def __init__(self, device_path: str | None = None, 
+                 key_mapping: Dict[int, int] | None = None,
                  enable_logging: bool = True):
         """
         Initialize training dongle library.
@@ -99,7 +99,7 @@ class TrainingDongleLib:
         else:
             self.logger.warning("Training dongle not detected")
     
-    def _find_training_dongle(self) -> Optional[str]:
+    def _find_training_dongle(self) -> str | None:
         """Auto-detect the training dongle input device."""
         by_id_path = "/dev/input/by-id"
         
@@ -168,7 +168,7 @@ class TrainingDongleLib:
             finally:
                 self.device_fd = None
     
-    def read_raw_event(self) -> Optional[tuple]:
+    def read_raw_event(self) -> tuple | None:
         """
         Read a raw input event from the device.
         
@@ -201,7 +201,7 @@ class TrainingDongleLib:
             self.logger.error(f"Error reading raw event: {e}")
             return None
     
-    def parse_key_event(self, raw_event: tuple) -> Optional[KeyEvent]:
+    def parse_key_event(self, raw_event: tuple) -> KeyEvent | None:
         """
         Parse a raw input event into a KeyEvent if it's a relevant key press.
         

@@ -32,17 +32,17 @@ Integration with LLM training:
     - Thread-safe for use in real-time robot systems
 """
 
-import threading
-import logging
 import fcntl
-import os
-import time
 import json
-from typing import Optional, Callable, List, Dict, Any
-from datetime import datetime, timedelta
+import logging
+import os
+import threading
+import time
 from collections import deque
+from datetime import datetime, timedelta
+from typing import Any, Callable, Dict, List, Optional
 
-from TrainingDongleLib import TrainingDongleLib, KeyEvent, TrainingScore
+from TrainingDongleLib import KeyEvent, TrainingDongleLib, TrainingScore
 
 
 class TrainingDongleManager:
@@ -57,7 +57,7 @@ class TrainingDongleManager:
     _lock = threading.Lock()
     _file_lock_path = '/tmp/training_dongle_manager.lock'
     
-    def __init__(self, base_dir: Optional[str] = None, log_path: Optional[str] = None,
+    def __init__(self, base_dir: str | None = None, log_path: str | None = None,
                  feedback_history_size: int = 1000):
         """
         Initialize training dongle manager.
@@ -285,7 +285,7 @@ class TrainingDongleManager:
             "feedback_rate": total_feedback / session_duration if session_duration > 0 else 0.0
         }
     
-    def export_feedback_data(self, filepath: Optional[str] = None) -> str:
+    def export_feedback_data(self, filepath: str | None = None) -> str:
         """
         Export feedback history to JSON file for training data.
         
@@ -355,7 +355,7 @@ class TrainingDongleManager:
         """Check if feedback monitoring is active."""
         return self._monitoring
     
-    def wait_for_feedback(self, timeout: float = 30.0) -> Optional[KeyEvent]:
+    def wait_for_feedback(self, timeout: float = 30.0) -> KeyEvent | None:
         """
         Wait for the next feedback event.
         

@@ -1,7 +1,9 @@
 
-import time
 import os
+import time
+
 from Managers.Speaker_Manager import SpeakerManager
+
 
 def get_latest_recording():
 	rec_dir = "/home/phiip/jetson-hardware/recordings"

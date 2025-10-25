@@ -1,6 +1,8 @@
 
-import smbus
 import time
+
+import smbus
+
 
 class CubeNano:
 	def __init__(self, i2c_bus=7, delay=0.002, debug=False):

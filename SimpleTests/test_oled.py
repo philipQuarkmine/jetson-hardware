@@ -1,7 +1,6 @@
 import time
+
 from Managers.OLED_Manager import OLEDManager
-
-
 
 oled = OLEDManager()
 oled.acquire()

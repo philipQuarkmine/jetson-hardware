@@ -2,6 +2,7 @@
 import os
 import subprocess
 
+
 class SpeakerLib:
 	def __init__(self, audio_device=None):
 		self.audio_device = audio_device or 'plughw:0,0'

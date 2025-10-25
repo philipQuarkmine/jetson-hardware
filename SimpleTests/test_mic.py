@@ -1,6 +1,6 @@
 import time
-from Managers.Mic_Manager import MicManager
 
+from Managers.Mic_Manager import MicManager
 
 mic = MicManager()
 mic.acquire()
