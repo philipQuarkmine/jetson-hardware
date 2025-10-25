@@ -165,6 +165,45 @@ camera.release()
 display.release()
 ```
 
+#### 🌙 Ambient Display & Screensavers
+**Purpose**: Peaceful visual animations for ambient lighting and display protection
+
+```python
+# Quick launcher with menu
+python3 SimpleTests/screensaver_launcher.py
+
+# Direct screensaver execution
+from Managers.Display_Manager import DisplayManager
+
+# Simple breathing colors (ultra-low power)
+python3 SimpleTests/simple_screensaver.py
+
+# Advanced wave animation (smooth flowing patterns)
+python3 SimpleTests/jetson_screensaver.py
+```
+
+**Features:**
+- 🌊 **Enhanced Wave Animation**: Dramatic flowing waves with trailing edge animation
+- 💤 **Smooth Breathing Colors**: Fluid brightness transitions at 15 FPS for seamless breathing effect  
+- ⚡ **Optimized Performance**: Wave mode ~12 FPS, Breathing mode ~15 FPS for smooth visuals
+- 🎨 **Extended Color Palettes**: 7 distinct color themes (Ocean, Emerald, Sunset, Amber, Teal, Rose, Lavender)
+- ✨ **Peaceful Sparkles**: Slow-drifting ambient sparkles with gentle movement
+- 🎭 **Anti-Flicker Technology**: Trailing edge erasing for smooth, matrix-free animation
+- ⌨️ **Graceful Exit**: Ctrl+C to stop with clean display restoration
+
+**Screensaver Options:**
+- **Simple Screensaver**: Perfect for overnight ambient lighting, smooth breathing transitions
+- **Enhanced Wave Screensaver**: Dramatic 150px tall waves, 7 color palettes, slow peaceful movement
+- **Interactive Launcher**: Menu-driven selection with descriptions and easy switching
+
+**Recent Enhancements (Oct 2025):**
+- ✅ **Taller Waves**: Increased amplitude to 150px for more dramatic visual impact
+- ✅ **Slower Movement**: Reduced wave speed to 0.3 for meditative, relaxing flow
+- ✅ **Smoother Breathing**: 15 FPS for fluid brightness transitions without stepping
+- ✅ **Enhanced Colors**: 7 distinct palettes with 2+ minute cycles for visible transitions
+- ✅ **Anti-Flicker**: Trailing edge animation eliminates matrix-like flickering
+- ✅ **Peaceful Sparkles**: Ultra-slow moving ambient dots (0.2x speed) for gentle ambiance
+
 #### Training Feedback System
 ```python
 from Managers.TrainingDongle_Manager import TrainingDongleManager
@@ -301,6 +340,11 @@ python3 SimpleTests/test_led.py
 
 # Test AI services
 python3 SimpleTests/interactive_chat.py
+
+# Test display & screensavers
+python3 SimpleTests/screensaver_launcher.py
+python3 SimpleTests/simple_screensaver.py
+python3 SimpleTests/jetson_screensaver.py
 ```
 
 ## Development Environment
