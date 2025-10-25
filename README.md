@@ -135,6 +135,36 @@ motors.emergency_stop()
 motors.release()
 ```
 
+#### Camera & Vision System
+```python
+from Managers.Camera_Manager import CameraManager
+from Managers.Display_Manager import DisplayManager
+
+# USB Camera capture
+camera = CameraManager()
+camera.acquire()
+camera.open_camera(camera_id=0, width=640, height=480, fps=30)
+
+# Take photos
+camera.save_image("/tmp/robot_view.jpg")
+
+# Real-time display integration
+display = DisplayManager()
+display.acquire()
+
+frame = camera.capture_frame()
+if frame is not None:
+    # Convert and display on framebuffer
+    from PIL import Image
+    frame_rgb = frame[:, :, ::-1]  # BGR to RGB
+    pil_image = Image.fromarray(frame_rgb)
+    pil_image.save("/tmp/live_view.jpg")
+    display.show_image("/tmp/live_view.jpg", (320, 200), update=True)
+
+camera.release()
+display.release()
+```
+
 #### Training Feedback System
 ```python
 from Managers.TrainingDongle_Manager import TrainingDongleManager
@@ -173,12 +203,14 @@ jetson-hardware/
 │   ├── LED_Manager.py         # LED control
 │   ├── OLED_Manager.py        # Display management
 │   ├── Display_Manager.py     # 📺 Framebuffer display system
+│   ├── Camera_Manager.py      # 📷 USB camera control & capture
 │   ├── Mic_Manager_Streaming.py # Real-time audio
 │   ├── Speaker_Manager.py     # Audio output
 │   ├── ArduinoMotor_Manager.py # Motor control
 │   └── TrainingDongle_Manager.py # Feedback system
 ├── Libs/                      # Low-level hardware interfaces
 │   ├── DisplayLib.py          # 📺 Direct framebuffer access
+│   ├── CameraLib.py           # 📷 Camera interface & control
 │   └── [Other hardware libs]  # Hardware-specific interfaces
 ├── SimpleTests/               # Test & example programs
 │   ├── interactive_chat.py    # 🚀 Streaming chat interface

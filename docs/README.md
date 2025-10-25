@@ -27,6 +27,10 @@ This folder contains documentation and hardware references for Jetson Orin Nano 
 - **`Display_Manager_README.md`**: Complete guide for framebuffer display management
 - Hardware-accelerated graphics with threading and GStreamer integration
 
+### NEW: Camera System Documentation
+- **`Camera_Manager_README.md`**: Complete guide for USB camera control and vision
+- Real-time capture with Display Manager integration, future CSI camera support
+
 ### Development Environment
 - **`Development_Environment_Setup.md`**: 🛠️ Complete development environment setup
 - VS Code configuration, Ruff linting, hardware-optimized coding standards

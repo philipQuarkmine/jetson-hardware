@@ -49,6 +49,11 @@ try:
 except ImportError:
     TrainingDongleManager = None
 
+try:
+    from .Camera_Manager import CameraManager
+except ImportError:
+    CameraManager = None
+
 __all__ = [
     'DisplayManager',
     'LEDManager', 
@@ -58,5 +63,6 @@ __all__ = [
     'LocalLLMManager',
     'MicManager',
     'StreamingMicManager',
-    'TrainingDongleManager'
+    'TrainingDongleManager',
+    'CameraManager'
 ]
