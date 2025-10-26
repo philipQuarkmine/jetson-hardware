@@ -194,6 +194,7 @@ python3 SimpleTests/jetson_screensaver.py
 **Screensaver Options:**
 - **Simple Screensaver**: Perfect for overnight ambient lighting, smooth breathing transitions
 - **Enhanced Wave Screensaver**: Dramatic 150px tall waves, 7 color palettes, slow peaceful movement
+- **🫀 Heartbeat Screensaver**: Anatomical pulsing heart (50-492px radius) with dynamic arterial energy network, varied color arteries, natural rhythm variations (resting/active/energetic states), 15 FPS smooth animation
 - **Interactive Launcher**: Menu-driven selection with descriptions and easy switching
 
 **Recent Enhancements (Oct 2025):**
