@@ -35,6 +35,14 @@ This folder contains documentation and hardware references for Jetson Orin Nano 
 - **`Development_Environment_Setup.md`**: 🛠️ Complete development environment setup
 - VS Code configuration, Ruff linting, hardware-optimized coding standards
 
+### Autonomous Operation Architecture
+- **`Autonomous_Operation_Architecture.md`**: 🤖 **Critical architectural guide for robot autonomy**
+- Three-layer program classification (Development/Critical/Monitoring)
+- SSH-independence patterns for autonomous operation
+- Systemd service implementation guidelines
+- Decision trees for program classification
+- **Must read before creating robot control systems**
+
 ### Arduino Motor Control
 - **Firmware**: `../Arduino/motor_controller/motor_controller.ino`
 - **Hardware**: Arduino Nano with dual PWM ESC motor control

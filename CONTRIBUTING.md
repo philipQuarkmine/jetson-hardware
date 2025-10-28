@@ -59,6 +59,136 @@ with open(lock_file) as f:  # ❌ Hardware locking needs explicit control
 
 ## Architecture Guidelines
 
+### Program Classification for Autonomous Operation
+
+The Jetson serves as an autonomous robot brain that must operate independently of SSH connections. All programs fall into one of three classes:
+
+#### **Class 1: Development Tools** (SSH-Dependent - Expected Behavior)
+Programs meant for development, testing, and human-in-the-loop training. **Should terminate when SSH disconnects.**
+
+**Characteristics:**
+- Interactive debugging and testing
+- Console output for developers
+- Manual intervention required
+- Located in `SimpleTests/` with `test_*` or `demo_*` prefix
+
+**Examples:**
+```python
+# SimpleTests/test_display_manager.py
+# SimpleTests/interactive_chat.py  
+# SimpleTests/demo_camera_manager.py
+```
+
+**Execution:** Direct via SSH (no special handling needed)
+```bash
+python3 SimpleTests/test_hardware.py
+```
+
+#### **Class 2: Critical Robot Services** (Must Survive SSH Disconnection)
+Core robot brain functionality that enables autonomous operation. **Must continue running when SSH disconnects.**
+
+**Characteristics:**
+- Autonomous control loops
+- Sensor fusion and decision making
+- Emergency monitoring
+- Safety-critical operations
+
+**Future Examples:**
+```python
+# Services/robot_control_service.py
+# Services/sensor_fusion_service.py
+# Services/emergency_monitor_service.py
+```
+
+**Execution:** Via systemd service (survives disconnections, restarts on crash)
+```bash
+sudo systemctl start robot-control
+sudo systemctl enable robot-control  # Auto-start on boot
+```
+
+**Implementation Requirements:**
+- Signal handling (SIGTERM, SIGHUP)
+- Graceful shutdown mechanisms
+- Logging to systemd journal
+- PID file management
+- Automatic restart on failure
+
+#### **Class 3: Background Monitoring** (Should Survive SSH Disconnection)
+Non-critical ambient displays and monitoring. **Should persist but robot can function if they stop.**
+
+**Characteristics:**
+- Visual feedback displays
+- System health monitoring
+- Data logging and visualization
+- Status indicators
+
+**Examples:**
+```python
+# SimpleTests/heartbeat_screensaver.py (current)
+# Future: system_monitor_display.py
+# Future: training_data_collector.py
+```
+
+**Execution:** Via nohup or screen (persists after SSH disconnect)
+```bash
+nohup python3 SimpleTests/heartbeat_screensaver.py > /tmp/heartbeat.log 2>&1 &
+
+# Or use screen for interactive access
+screen -S monitor
+python3 system_monitor.py
+# Detach: Ctrl+A, D
+```
+
+### The Fundamental Question
+
+Before creating any new program, ask:
+
+> **"Should this keep running if the robot is alone in a room?"**
+
+- ✅ **YES** → Class 2 (Critical Service) - Use systemd
+- 🤔 **MAYBE** → Class 3 (Background Monitor) - Use nohup/screen  
+- ❌ **NO** → Class 1 (Development Tool) - SSH-attached is fine
+
+### Naming Conventions
+
+Follow these conventions to make program classification immediately clear:
+
+```python
+# Class 1: Development Tools
+test_*.py          # Unit/integration tests
+demo_*.py          # Interactive demonstrations
+interactive_*.py   # Human-in-the-loop interfaces
+
+# Class 2: Critical Services  
+*_service.py       # Should become systemd service
+*_control.py       # Core robot control loops
+
+# Class 3: Background Monitors
+*_monitor.py       # System monitoring displays
+*_screensaver.py   # Ambient displays
+*_logger.py        # Background data collection
+```
+
+### Migration Checklist for Autonomous Programs
+
+When creating Class 2 or Class 3 programs:
+
+**Class 2 (Critical Services):**
+- [ ] Implements signal handling (SIGTERM, SIGHUP, SIGINT)
+- [ ] Has graceful shutdown with resource cleanup
+- [ ] Logs to file/journal instead of console
+- [ ] Creates PID file for process management
+- [ ] Has systemd service file in `/systemd` directory
+- [ ] Documents installation and service management
+- [ ] Handles hardware manager acquire/release on shutdown
+
+**Class 3 (Background Monitors):**
+- [ ] Can be safely killed without data loss
+- [ ] Logs to file (not console)
+- [ ] Documents nohup/screen usage in docstring
+- [ ] Releases hardware resources on exit
+- [ ] Includes process check in status scripts
+
 ### Manager Pattern
 All hardware access follows the acquire/release pattern:
 

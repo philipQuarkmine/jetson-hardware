@@ -232,6 +232,141 @@ Each manager has a **single responsibility**:
 - **Hardware Managers**: Exclusive, thread-safe hardware access
 - **Libraries**: Low-level hardware interfaces
 
+## Autonomous Operation Architecture
+
+The Jetson Orin Nano is designed to function as an **autonomous robot brain** that operates independently of SSH connections. All programs are classified into three categories based on their operational requirements:
+
+### Three Classes of Programs
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  CLASS 1: Development Tools (SSH-Dependent)                 │
+│  Purpose: Testing, debugging, human-in-the-loop training    │
+│  Behavior: Terminates when SSH disconnects (expected)       │
+│  Examples: SimpleTests/test_*.py, interactive_chat.py       │
+│  Execution: python3 SimpleTests/test_hardware.py            │
+├─────────────────────────────────────────────────────────────┤
+│  CLASS 2: Critical Robot Services (SSH-Independent)         │
+│  Purpose: Core autonomous operation, safety monitoring      │
+│  Behavior: MUST survive SSH disconnection                   │
+│  Examples: [Future] robot_control, sensor_fusion            │
+│  Execution: systemctl start robot-control                   │
+├─────────────────────────────────────────────────────────────┤
+│  CLASS 3: Background Monitoring (Should Survive SSH)        │
+│  Purpose: Status displays, data logging, visualization      │
+│  Behavior: Should persist, but robot functions if stopped   │
+│  Examples: heartbeat_screensaver.py, system monitors        │
+│  Execution: nohup python3 program.py &                      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### The Fundamental Design Question
+
+Before creating any new program, ask:
+
+> **"Should this keep running if the robot is alone in a room?"**
+
+- ✅ **YES** → Class 2 (Critical Service) - Implement as systemd service
+- 🤔 **MAYBE** → Class 3 (Background Monitor) - Use nohup/screen
+- ❌ **NO** → Class 1 (Development Tool) - SSH-attached is fine
+
+### Program Naming Conventions
+
+```python
+# Class 1: Development Tools (OK to die with SSH)
+test_*.py          # Hardware and integration tests
+demo_*.py          # Interactive demonstrations  
+interactive_*.py   # Human-in-the-loop interfaces
+
+# Class 2: Critical Services (MUST survive SSH)
+*_service.py       # Autonomous robot services
+*_control.py       # Core control loops
+
+# Class 3: Background Monitors (SHOULD survive SSH)
+*_monitor.py       # System monitoring displays
+*_screensaver.py   # Ambient visualizations
+*_logger.py        # Background data collection
+```
+
+### Execution Methods by Class
+
+**Class 1: Direct Execution** (Development)
+```bash
+# Runs attached to SSH session
+python3 SimpleTests/test_display.py
+
+# Terminates when SSH disconnects (expected behavior)
+```
+
+**Class 2: Systemd Services** (Critical Operations)
+```bash
+# Run as system service (survives SSH disconnection)
+sudo systemctl start robot-control
+sudo systemctl enable robot-control  # Auto-start on boot
+sudo systemctl status robot-control  # Check status
+
+# View logs
+sudo journalctl -u robot-control -f
+```
+
+**Class 3: Background Daemons** (Monitoring)
+```bash
+# Use nohup to survive SSH disconnection
+nohup python3 SimpleTests/heartbeat_screensaver.py > /tmp/heartbeat.log 2>&1 &
+
+# Or use screen for persistent session
+screen -S monitor
+python3 system_monitor.py
+# Detach: Ctrl+A, D
+# Reattach: screen -r monitor
+
+# Check if running
+ps aux | grep heartbeat_screensaver
+```
+
+### Implementation Checklist
+
+**For Class 2 Programs (Critical Services):**
+- [ ] Implements signal handling (SIGTERM, SIGHUP, SIGINT)
+- [ ] Graceful shutdown with hardware resource cleanup
+- [ ] Logs to systemd journal or file (not console)
+- [ ] Creates PID file for process management
+- [ ] Has systemd service file
+- [ ] Auto-restart on failure
+- [ ] Properly releases all hardware managers on exit
+
+**For Class 3 Programs (Background Monitors):**
+- [ ] Can be safely terminated without data loss
+- [ ] Logs to file instead of console
+- [ ] Documents nohup/screen usage in docstring
+- [ ] Releases hardware resources on SIGTERM
+- [ ] Includes status check commands
+
+### Current Program Classification
+
+**Class 1: Development Tools**
+- `SimpleTests/test_*.py` - All hardware tests
+- `SimpleTests/demo_*.py` - Interactive demonstrations
+- `SimpleTests/interactive_chat.py` - LLM chat interface
+
+**Class 2: Critical Services**
+- `LocalLLM_Manager` - Already implements independent subprocess pattern ✅
+- [Future] Robot control loops, sensor fusion, emergency monitoring
+
+**Class 3: Background Monitoring**
+- `SimpleTests/heartbeat_screensaver.py` - Ambient display (use with nohup)
+- `SimpleTests/jetson_screensaver.py` - Wave animation (use with nohup)
+- [Future] System health monitors, training data collectors
+
+### Best Practices
+
+1. **Development Phase**: Use Class 1 programs for testing and iteration
+2. **Deployment Phase**: Migrate critical functions to Class 2 systemd services
+3. **Monitoring**: Use Class 3 for visual feedback and non-critical logging
+4. **Always Consider**: Will the robot be safe if this program stops unexpectedly?
+
+For detailed implementation guidelines, see `CONTRIBUTING.md` section on "Program Classification for Autonomous Operation".
+
 ## Project Structure
 
 ```
