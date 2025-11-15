@@ -558,6 +558,18 @@ class HeartbeatScreensaver:
         # Manage dynamic arteries first
         self.manage_dynamic_arteries(t)
         
+        # Clean up particles that are stuck without arteries
+        stuck_particles = []
+        for particle in self.energy_particles:
+            if particle['artery_id'] is None and not particle['is_pathfinder']:
+                stuck_particles.append(particle)
+        
+        # Recycle stuck particles back to dormant pool
+        for particle in stuck_particles:
+            if particle in self.energy_particles:
+                self.energy_particles.remove(particle)
+            self.dormant_particles.append(particle)
+        
         for particle in self.energy_particles:
             if particle['artery_id'] is None or particle['artery_id'] not in self.dynamic_arteries:
                 # Particle needs a new path
@@ -589,9 +601,13 @@ class HeartbeatScreensaver:
                 if particle in artery_data['particles']:
                     artery_data['particles'].remove(particle)
                 
-                # 70% chance to join existing underused path, 30% chance to create new path
+                # Reset particle state
+                particle['position'] = 0
+                particle['artery_id'] = None
+                
+                # Try to assign to new path: 70% existing, 30% create new
                 available_arteries = [aid for aid, adata in self.dynamic_arteries.items() 
-                                    if adata['usage_count'] < adata['max_usage'] and aid != particle['artery_id']]
+                                    if adata['usage_count'] < adata['max_usage'] and aid != particle.get('artery_id')]
                 
                 if available_arteries and random.random() < 0.7:
                     # Join an existing underused path
@@ -600,36 +616,18 @@ class HeartbeatScreensaver:
                     particle['position'] = 0
                     self.dynamic_arteries[artery_id]['particles'].append(particle)
                     self.dynamic_arteries[artery_id]['usage_count'] += 1
-                else:
-                    # Create new path - become pathfinder
-                    particle['artery_id'] = None
-                    particle['position'] = 0
+                elif len(self.dynamic_arteries) < self.max_arteries:
+                    # Become pathfinder to create new artery
                     particle['is_pathfinder'] = True
                     particle['path_being_created'] = []
                     if particle not in self.particles_needing_paths:
                         self.particles_needing_paths.append(particle)
-                
-                # Reset particle for new journey
-                particle['position'] = 0
-                particle['artery_id'] = None
-                
-                # Try to assign to existing underused artery first
-                available_arteries = [aid for aid, artery in self.dynamic_arteries.items() 
-                                    if artery['usage_count'] < artery['max_usage'] and len(artery['particles']) < 3]
-                
-                if available_arteries and random.random() < 0.7:  # 70% chance to follow existing path
-                    artery_id = random.choice(available_arteries)
-                    particle['artery_id'] = artery_id
-                    self.dynamic_arteries[artery_id]['particles'].append(particle)
-                    self.dynamic_arteries[artery_id]['usage_count'] += 1
-                    print(f"💚 Particle joined existing path {artery_id}")
                 else:
-                    # Become pathfinder for new route
-                    if len(self.dynamic_arteries) < self.max_arteries:
-                        particle['is_pathfinder'] = True
-                        if particle not in self.particles_needing_paths:
-                            self.particles_needing_paths.append(particle)
-                            print(f"💚 Particle becoming pathfinder")
+                    # System is full - return particle to dormant pool for re-spawning
+                    if particle in self.energy_particles:
+                        self.energy_particles.remove(particle)
+                    self.dormant_particles.append(particle)
+                
                 continue
             
             # Draw new position
