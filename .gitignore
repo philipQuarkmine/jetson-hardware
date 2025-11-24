@@ -26,6 +26,8 @@ Thumbs.db
 
 # Project
 recordings/
+nvethernetrm/
+nvidia-oot/
 
 # Secrets and API Keys
 .secrets/
