@@ -1,23 +1,46 @@
 #!/usr/bin/env bash
+# sync_recovery_docs.sh - Sync all recovery documentation to USB backup
+# Run with: sudo ./scripts/sync_recovery_docs.sh
 set -euo pipefail
 
-DOC_SOURCE="$(dirname "$0")/../docs/RECOVERY_ROADMAP.md"
+DOCS_DIR="$(dirname "$0")/../docs"
 BACKUP_MOUNT="/media/phiip/jetson_backup"
 BACKUP_DEV="/dev/sda1"
-DEST_FILE="$BACKUP_MOUNT/RECOVERY_ROADMAP.md"
 
-if [[ ! -f "$DOC_SOURCE" ]]; then
-  echo "Source roadmap not found: $DOC_SOURCE" >&2
-  exit 1
-fi
+# List of recovery docs to sync
+RECOVERY_DOCS=(
+  "RECOVERY_ROADMAP.md"
+  "GRUB_DUALBOOT_RECOVERY.md"
+)
 
+# Ensure backup drive is mounted
 if ! mount | grep -q " $BACKUP_MOUNT "; then
   echo "Mounting $BACKUP_DEV to $BACKUP_MOUNT"
   sudo mkdir -p "$BACKUP_MOUNT"
   sudo mount "$BACKUP_DEV" "$BACKUP_MOUNT"
 fi
 
-sudo cp "$DOC_SOURCE" "$DEST_FILE"
-sudo sync
+# Get today's dated backup folder
+DATED_BACKUP=$(ls -d "$BACKUP_MOUNT"/jetson_backup_* 2>/dev/null | sort -r | head -1)
 
-echo "Roadmap synced to $DEST_FILE"
+# Sync each doc
+for doc in "${RECOVERY_DOCS[@]}"; do
+  src="$DOCS_DIR/$doc"
+  if [[ -f "$src" ]]; then
+    # Copy to USB root
+    sudo cp "$src" "$BACKUP_MOUNT/$doc"
+    echo "Synced $doc to $BACKUP_MOUNT/"
+    
+    # Also copy to dated backup folder if it exists
+    if [[ -n "$DATED_BACKUP" && -d "$DATED_BACKUP" ]]; then
+      sudo cp "$src" "$DATED_BACKUP/$doc"
+      echo "Synced $doc to $DATED_BACKUP/"
+    fi
+  else
+    echo "Warning: $src not found, skipping"
+  fi
+done
+
+sudo sync
+echo ""
+echo "All recovery docs synced to USB backup"

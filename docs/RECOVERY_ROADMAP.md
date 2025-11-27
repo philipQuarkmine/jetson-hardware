@@ -4,6 +4,24 @@ _Last updated: 2025-11-23_
 
 This is the single source of truth for recovering, rebuilding, and documenting the Jetson Orin Nano dev kit. It merges the historical slot-based playbook with the new, proven NVMe reflash procedure that finally brought the system back online on 2025‑11‑23. Keep a copy of this file on removable media (`/media/phiip/jetson_backup/RECOVERY_ROADMAP.md`) so the process stays accessible even when the NVMe rootfs is unavailable.
 
+
+## ⭐ NEW: GRUB Dual-Boot Configuration (2025-11-26)
+
+**MAJOR BREAKTHROUGH:** GRUB dual-boot is now working on NVMe!
+
+See **[GRUB_DUALBOOT_RECOVERY.md](GRUB_DUALBOOT_RECOVERY.md)** for complete details.
+
+### Quick Reference:
+- **STABLE (p1):** Production OS - 65GB
+- **EXPERIMENTAL (p16):** Kernel development - 865GB
+- **ESP (p10):** GRUB bootloader
+- **To see GRUB menu:** Remove SD card before boot!
+
+### Key Files:
+- ESP: /dev/nvme0n1p10 -> /EFI/BOOT/{BOOTAA64.efi,grub.cfg}
+- Main GRUB: /dev/nvme0n1p1 -> /boot/grub/grub.cfg
+
+---
 ---
 
 ## 0. Current Snapshot (2025-11-23)
